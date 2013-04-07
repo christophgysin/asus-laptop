@@ -1,0 +1,1 @@
+add_efi_memmap i915.i915_enable_rc6=1 pcie_aspm=force drm.vblankoffdelay=1 i915.semaphores=1 acpi_osi=
