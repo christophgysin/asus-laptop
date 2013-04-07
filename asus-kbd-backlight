@@ -1,0 +1,53 @@
+#!/bin/bash
+
+led="/sys/class/leds/asus::kbd_backlight"
+min=0
+max=$(<${led}/max_brightness)
+step=1
+previous=$(<${led}/brightness)
+
+brightness() {
+    value=$1
+
+    [[ $value = [0-9]* ]] || exit 1
+
+    [[ $value -gt $max ]] && value=$max
+    [[ $value -lt $min ]] && value=$min
+
+    echo $value >> ${led}/brightness
+}
+
+while [ -n $1 ]; do
+    action=$1
+    shift
+
+    case "$action" in
+        show)
+            echo $(<${led}/brightness)
+            ;;
+        off)
+            brightness 0
+            ;;
+        min|low|night)
+            brightness 1
+            ;;
+        on|max)
+            brightness $max
+            ;;
+        up)
+            brightness $(($previous + $step))
+            ;;
+        down)
+            brightness $(($previous - $step))
+            ;;
+        allowusers)
+            sudo chgrp users ${led}/brightness
+            sudo chmod g+w ${led}/brightness
+            ;;
+        disallowusers)
+            sudo chgrp root ${led}/brightness
+            sudo chmod g-w ${led}/brightness
+            ;;
+        *) brightness $action
+    esac
+done
